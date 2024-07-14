@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
     QHBoxLayout,
+    QScrollArea,
     QCheckBox,
     QLineEdit,
     QLabel,
@@ -30,11 +31,9 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setWindowTitle("Aide à la recommandation vaccinale")
+        self.construire_conditions()
         layout = QVBoxLayout()
         # Add widgets
-        #checkbox = QCheckBox()
-        #checkbox.setCheckState(Qt.Unchecked)
-        #layout.addWidget(checkbox)
         age_label = QLabel("Âge du patient :")
         age = QLineEdit()
         age.setMaxLength(7)
@@ -45,6 +44,25 @@ class MainWindow(QMainWindow):
         age_line = QWidget()
         age_line.setLayout(age_layout)
         layout.addWidget(age_line)
+        conds_layout = QVBoxLayout()
+        for c in self.conditions:
+            checkbox = QCheckBox()
+            checkbox.setCheckState(Qt.Unchecked)
+            checkbox.setFixedWidth(16)
+            cond_label = QLabel(c)
+            cond_label.setMaximumWidth(1000)
+            cond_label.setWordWrap(True)
+            cond_layout = QHBoxLayout()
+            cond_layout.addWidget(checkbox)
+            cond_layout.addWidget(cond_label)
+            cond_line = QWidget()
+            cond_line.setLayout(cond_layout)
+            conds_layout.addWidget(cond_line)
+        conds_widget = QWidget()
+        conds_widget.setLayout(conds_layout)
+        conds_scroll = QScrollArea()
+        conds_scroll.setWidget(conds_widget)
+        layout.addWidget(conds_scroll)
         # Bouton envoi
         bouton = QPushButton("Recommandations")
         bouton.clicked.connect(self.envoi)
@@ -69,6 +87,18 @@ class MainWindow(QMainWindow):
             return
         patient["age"] = int(age_split[0])
         self.recommandations(patient)
+
+    def construire_conditions(self):
+        self.conditions = list()
+        for regle in ws.iter_rows(min_row=2):
+            if regle[2] is None or regle[2].value is None:
+                continue
+            for c in regle[2].value.split(";"):
+                c = c.strip()
+                if c == "rattrapage":
+                    continue
+                if c not in self.conditions:
+                    self.conditions.append(c)
 
     def recommandations(self, patient):
         regles_applicables = list()
