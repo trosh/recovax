@@ -154,6 +154,10 @@ class MainWindow(QMainWindow):
                 "description": description,
             })
         self.clearLayout(self.layout)
+        text = f"Patient de {patient['age']} ans"
+        for c in patient["conditions"]:
+            text += f"<br>&mdash; {c}"
+        self.layout.addWidget(QLabel(text))
         self.layout.addWidget(QLabel("<b>Vaccinations :</b><br>"))
         deja_faits = list()
         for regle in regles_applicables:
