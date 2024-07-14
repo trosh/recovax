@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -30,7 +31,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.setWindowTitle("[v0.3] Aide à la recommandation vaccinale")
+        self.setWindowTitle("[v0.4] Aide à la recommandation vaccinale")
         self.construire_conditions()
         layout = QVBoxLayout()
         self.en_tete(layout)
@@ -80,8 +81,17 @@ class MainWindow(QMainWindow):
         self.layout = layout
         self.age = age
 
+    def openUrl(self, url):
+        QDesktopServices.openUrl(QUrl(url))
+
     def en_tete(self, layout):
         layout.addWidget(QLabel("<b style='font-size: 3em; color: red'>Ceci est un outil en développement, à ne pas utiliser en contexte médical</b>"))
+        button = QPushButton("Calendrier des vaccinations avril 2024 [PDF 11,3 Mo]")
+        button.clicked.connect(lambda _ : { self.openUrl("https://www.ameli.fr/sites/default/files/Documents/calendrier_vaccinal_PS_avril24.pdf")})
+        layout.addWidget(button)
+        button = QPushButton("Calendrier vaccinal simplifié avril 2024 [PDF 0,7 Mo]")
+        button.clicked.connect(lambda _ : { self.openUrl("https://www.ameli.fr/sites/default/files/Documents/calendrier%20vaccinal%20simplifi%C3%A9%20avril%202024.pdf")})
+        layout.addWidget(button)
 
     def envoi(self):
         patient = dict()
