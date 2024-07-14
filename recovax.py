@@ -47,6 +47,8 @@ class MainWindow(QMainWindow):
         conds_layout = QVBoxLayout()
         self.conds = list()
         for c in self.conditions:
+            if c == "toute comorbidité":
+                continue
             checkbox = QCheckBox()
             checkbox.setCheckState(Qt.Unchecked)
             checkbox.setFixedWidth(16)
@@ -159,7 +161,8 @@ class MainWindow(QMainWindow):
                 match_all = True
                 for c in conditions:
                     if c == "rattrapage" \
-                    or c not in patient["conditions"]:
+                    or not ((c == "toute comorbidité" and len(patient["conditions"]) > 0) \
+                            or c in patient["conditions"]):
                         match_all = False
                         break
                 if not match_all:
