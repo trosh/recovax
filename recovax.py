@@ -45,6 +45,7 @@ class MainWindow(QMainWindow):
         age_line.setLayout(age_layout)
         layout.addWidget(age_line)
         conds_layout = QVBoxLayout()
+        self.conds = list()
         for c in self.conditions:
             checkbox = QCheckBox()
             checkbox.setCheckState(Qt.Unchecked)
@@ -52,6 +53,7 @@ class MainWindow(QMainWindow):
             cond_label = QLabel(c)
             cond_label.setMaximumWidth(1000)
             cond_label.setWordWrap(True)
+            self.conds.append([checkbox, cond_label])
             cond_layout = QHBoxLayout()
             cond_layout.addWidget(checkbox)
             cond_layout.addWidget(cond_label)
@@ -86,6 +88,11 @@ class MainWindow(QMainWindow):
             print("TODO dialog")
             return
         patient["age"] = int(age_split[0])
+        patient["conditions"] = list()
+        for (checkbox, label) in self.conds:
+            if checkbox.checkState() == Qt.Checked:
+                patient["conditions"].append(label.text())
+                print(label.text())
         self.recommandations(patient)
 
     def construire_conditions(self):
@@ -122,6 +129,8 @@ class MainWindow(QMainWindow):
                 conditions = None
             else:
                 conditions = regle[2].value
+                if conditions is not None:
+                    conditions = list(map(str.strip, conditions.split(";")))
             # Description, précisions
             if regle[3] is None or regle[3].value is None:
                 description = None
@@ -143,13 +152,21 @@ class MainWindow(QMainWindow):
             })
         self.clearLayout(self.layout)
         self.layout.addWidget(QLabel("<b>Vaccinations :</b><br>"))
+        deja_faits = list()
         for regle in regles_applicables:
             conditions = regle["conditions"]
             if conditions is not None:
-                if "rattrapage" in conditions.split(", "):
+                match_all = True
+                for c in conditions:
+                    if c == "rattrapage" \
+                    or c not in patient["conditions"]:
+                        match_all = False
+                        break
+                if not match_all:
                     continue
-                else:
-                    continue # TODO traitement comorbidités
+            if regle["vaccin_contre"] in deja_faits:
+                continue
+            deja_faits.append(regle["vaccin_contre"])
             self.affichage_vaccin(
                 regle["vaccin_contre"],
                 regle["age"],
@@ -157,8 +174,18 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(QLabel("<b>Rattrapages :</b><br>"))
         for regle in regles_applicables:
             conditions = regle["conditions"]
-            if conditions is not None \
-            and "rattrapage" in conditions.split(", "):
+            if conditions is None:
+                continue
+            if "rattrapage" in conditions:
+                match_all = True
+                for c in conditions:
+                    if c == "rattrapage":
+                        continue
+                    if c not in patient["conditions"]:
+                        match_all = False
+                        break
+                if not match_all:
+                    continue
                 self.affichage_vaccin(
                     regle["vaccin_contre"],
                     regle["age"],
