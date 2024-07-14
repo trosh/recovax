@@ -30,7 +30,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.setWindowTitle("[v0.2] Aide à la recommandation vaccinale")
+        self.setWindowTitle("[v0.3] Aide à la recommandation vaccinale")
         self.construire_conditions()
         layout = QVBoxLayout()
         self.en_tete(layout)
