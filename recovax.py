@@ -196,15 +196,16 @@ class MainWindow(QMainWindow):
                     regle["description"])
 
     def affichage_vaccin(self, vaccin_contre, age, description):
-        self.layout.addWidget(QLabel(f"- Vaccin contre {vaccin_contre}"))
+        text = f"{vaccin_contre}"
         if age is not None:
             if type(age) is int:
-                self.layout.addWidget(QLabel(f"\t{age} ans et plus"))
+                text += f"<br>&mdash; {age} ans et plus"
             else:
-                self.layout.addWidget(QLabel(f"\tentre {age[0]} et {age[1]} ans"))
+                text += f"<br>&mdash; entre {age[0]} et {age[1]} ans"
         if description is not None:
-            self.layout.addWidget(QLabel(f"\t{description}"))
-        self.layout.addWidget(QLabel(""))
+            text += f"<br>&mdash; {description}"
+        text_label = QLabel(text)
+        self.layout.addWidget(text_label)
 
     def clearLayout(self, layout):
         if layout is not None:
