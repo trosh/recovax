@@ -33,7 +33,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("[v0.2] Aide à la recommandation vaccinale")
         self.construire_conditions()
         layout = QVBoxLayout()
-        layout.addWidget(QLabel("<b style='font-size: 3em; color: red'>Ceci est un outil en développement, à ne pas utiliser en contexte médical</b>"))
+        self.en_tete(layout)
         # Add widgets
         age_label = QLabel("Âge du patient :")
         age = QLineEdit()
@@ -79,6 +79,9 @@ class MainWindow(QMainWindow):
         # References
         self.layout = layout
         self.age = age
+
+    def en_tete(self, layout):
+        layout.addWidget(QLabel("<b style='font-size: 3em; color: red'>Ceci est un outil en développement, à ne pas utiliser en contexte médical</b>"))
 
     def envoi(self):
         patient = dict()
@@ -154,6 +157,7 @@ class MainWindow(QMainWindow):
                 "description": description,
             })
         self.clearLayout(self.layout)
+        self.en_tete(self.layout)
         text = f"Patient de {patient['age']} ans"
         for c in patient["conditions"]:
             text += f"<br>&mdash; {c}"
