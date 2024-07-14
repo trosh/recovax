@@ -158,7 +158,7 @@ class MainWindow(QMainWindow):
         for c in patient["conditions"]:
             text += f"<br>&mdash; {c}"
         self.layout.addWidget(QLabel(text))
-        self.layout.addWidget(QLabel("<b>Vaccinations :</b><br>"))
+        self.layout.addWidget(QLabel("<b>Vaccinations :</b>"))
         deja_faits = list()
         for regle in regles_applicables:
             conditions = regle["conditions"]
@@ -179,7 +179,7 @@ class MainWindow(QMainWindow):
                 regle["vaccin_contre"],
                 regle["age"],
                 regle["description"])
-        self.layout.addWidget(QLabel("<b>Rattrapages :</b><br>"))
+        self.layout.addWidget(QLabel("<b>Rattrapages :</b>"))
         for regle in regles_applicables:
             conditions = regle["conditions"]
             if conditions is None:
