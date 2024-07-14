@@ -30,9 +30,10 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.setWindowTitle("Aide à la recommandation vaccinale")
+        self.setWindowTitle("[v0.2] Aide à la recommandation vaccinale")
         self.construire_conditions()
         layout = QVBoxLayout()
+        layout.addWidget(QLabel("<b style='font-size: 3em; color: red'>Ceci est un outil en développement, à ne pas utiliser en contexte médical</b>"))
         # Add widgets
         age_label = QLabel("Âge du patient :")
         age = QLineEdit()
