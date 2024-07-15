@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <head>
-<title>[v0.5] Aide à la recommandation vaccinale</title>
+<title>[v0.6] Aide à la recommandation vaccinale</title>
 <script>
 REGLES_VACCINS = [ // Par ordre de priorité !
+	{ "contre": "Diphtérie (D), Tétanos (T), Coqueluche acellulaire (Ca), Poliomyélite (P)", "mois": 2,  "description": "DTCaP" },
+	{ "contre": "Diphtérie (D), Tétanos (T), Coqueluche acellulaire (Ca), Poliomyélite (P)", "mois": 4,  "description": "DTCaP" },
+	{ "contre": "Diphtérie (D), Tétanos (T), Coqueluche acellulaire (Ca), Poliomyélite (P)", "mois": 11, "description": "DTCaP" },
+	{ "contre": "Haemophilus influenzae b (Hib)", "mois": 2,  "description": "Hib" },
+	{ "contre": "Haemophilus influenzae b (Hib)", "mois": 4,  "description": "Hib" },
+	{ "contre": "Haemophilus influenzae b (Hib)", "mois": 11, "description": "Hib" },
 	{
 		"contre": "Diphtérie (d), Tétanos (T), Poliomyélite (P)",
 		"ans": [25, 34],
@@ -133,12 +139,14 @@ function format_age(regle) {
 		return `Entre ${ans[0]} et ${ans[1]} ans`;
 	}
 	const mois = regle["mois"];
+	if (typeof(mois) === "number")
+		return `À ${mois} mois`;
 	return `Entre ${mois[0]} et ${mois[1]} mois`;
 }
 
 function maj_reco() {
 	const age_elem = document.querySelector("#age");
-	const age_text = Number(age_elem.value);
+	const age_nb = Number(age_elem.value);
 	const unite_elem = document.querySelector("#unite");
 	const unite_text = unite_elem.value;
 	const conditions = [];
@@ -150,10 +158,16 @@ function maj_reco() {
 	let regles_applicables = [];
 	for (let regle of REGLES_VACCINS) {
 		if ("ans" in regle || "mois" in regle) {
-			if (!(unite_text in regle)
-			|| age_text < regle[unite_text][0]
-			|| age_text > regle[unite_text][1])
+			if (!(unite_text in regle))
 				continue;
+			if (typeof(regle[unite_text]) === "number") {
+				if (age_nb !== regle[unite_text])
+					continue;
+			} else {
+				if (age_nb < regle[unite_text][0]
+				 || age_nb > regle[unite_text][1])
+					continue;
+			}
 		}
 		let match_any = false;
 		if ("conditions" in regle) {
