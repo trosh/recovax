@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<head>
+<title>[v0.5] Aide à la recommandation vaccinale</title>
+<script>
+REGLES_VACCINS = [ // Par ordre de priorité !
+	{
+		"contre": "Diphtérie (d), Tétanos (T), Poliomyélite (P)",
+		"ans": [25, 34],
+		"description": "rappel dTcaP ou dTP si dernier rappel de dTcaP < 5 ans",
+	},
+	{
+		"contre": "Diphtérie (d), Tétanos (T), Poliomyélite (P)",
+		"ans": [45, 64],
+		"description": "rappel",
+	},
+	{
+		"contre": "Coqueluche acellulaire (ca)",
+		"ans": [65, Infinity],
+		"description": "rappel à 65, 75, 85 ans …",
+	},
+	{
+		"contre": "Grippe",
+		"ans": [65, Infinity],
+		"description": "1 dose annuelle",
+	},
+	{
+		"contre": "Zona",
+		"ans": [65, Infinity],
+		"description": "vaccination préférentielle avec le vaccin Shingrix ; 2 doses espacées de 2 mois à défault une dose du vaccin Zostavax entre 65 et 74 ans chez l'immunocompétent",
+	},
+	{
+		"contre": "Coqueluche acellulaire (ca)",
+		"ans": [25, 39],
+		"rattrapage": true,
+		"description": "1 dose dTcaP si pas reçu de rappel à 25 ans"
+	},
+	{
+		"contre": "Méningocoques ACWY (vaccin conjugué)",
+		"ans": [15, 24],
+		"rattrapage": true,
+		"description": "1 dose"
+	},
+	{
+		"contre": "Papillomavirus humains (HPV) chez les jeunes femmes et les jeunes hommes",
+		"ans": [18, 19],
+		"rattrapage": true,
+		"description": "Schéma à 3 doses 0, 2, 6 mois"
+	},
+	{
+		"contre": "Rougeole (R), Oreillons (O), Rubéole (R)",
+		"ans": [18, 44],
+		"rattrapage": true,
+		"description": "Atteindre 2 doses au total chez les personnes nées depuis 1980",
+	},
+	{
+		"contre": "Rubéole",
+		"ans": [18, 64],
+		"rattrapage": true,
+		"conditions": ["femme"],
+		"description": "1 dose de ROR pour les femmes en âge de procréer",
+	},
+	{
+		"contre": "Coqueluche acellulaire (ca)",
+		"conditions": ["femme enceinte SA20-36"],
+	},
+	{
+		"contre": "Coqueluche acellulaire (ca)",
+		"conditions": ["cocooning"],
+		"description": "1 dose dTcaP si jamais vacciné ou si la dernière dose de vaccin coquelucheux date de plus de 10 ans (délai minimal d'un mois entre 1 dose de dTP et 1 dose de dTcaP)",
+	},
+	{
+		"contre": "Coqueluche acellulaire (ca)",
+		"ans": [15, 24],
+		"conditions": ["cocooning"],
+		"description": "1 dose dTcaP si dernière injection remonte à plus de 5 ans",
+	},
+	{
+		"contre": "Covid-19",
+		"ans": [18, Infinity],
+		"conditions": ["très haut risque"],
+		"description": "recommandé, 2 doses annuelles, à l'automne et au printemps",
+	},
+	{
+		"contre": "Covid-19",
+		"ans": [18, Infinity],
+		"conditions": ["toute comorbidité"],
+		"description": "recommandé, 1 dose annuelle à l'automne",
+	},
+	{
+		"contre": "Covid-19",
+		"ans": [65, Infinity],
+		"description": "recommandé, 1 dose annuelle à l'automne",
+	},
+	{
+		"contre": "Grippe",
+		"ans": [18, Infinity],
+		"conditions": [
+			"femme enceinte",
+			"affections broncho-pulmonaires chroniques répondant aux critères de l’ALD 14 (asthme et BPCO)",
+			"insuffisances respiratoires chroniques obstructives ou restrictives quelle que soit la cause, y compris les maladies neuromusculaires à risque de décompensation respiratoire, les malformations des voies aériennes supérieurs ou inférieures, les malformations pulmonaires ou les malformations de la cage thoracique",
+			"maladies respiratoires chroniques ne remplissant pas les critères de l’ALD mais susceptibles d’être aggravées ou décompensées par une affection grippale, dont asthme, bronchite chronique, bronchiectasies, hyper-réactivité bronchique",
+			"dysplasies broncho-pulmonaires",
+			"mucoviscidose",
+			"cardiopathies congénitales cyanogènes ou avec une HTAP et/ou une insuffisance cardiaque",
+			"insuffisances cardiaques graves",
+			"valvulopathies graves",
+			"troubles du rythme graves justifiant un traitement au long cours",
+			"maladies des coronaires",
+			"antécédents d’accident vasculaire cérébral",
+			"formes graves des affections",
+			"neurologiques et musculaires (dont myopathie, poliomyélite, myasthénie, maladie de Charcot)",
+			"paraplégies et tétraplégies avec atteinte diaphragmatique",
+			"néphropathies chroniques graves",
+			"syndromes néphrotiques",
+			"drépanocytoses, homozygotes et doubles hétérozygotes S/C",
+			"thalasso drépanocytoses",
+			"diabètes de type 1 et de type 2",
+			"déficits immunitaires primitifs ou acquis (pathologies oncologiques et hématologiques, transplantation d’organe et de cellules souches hématopoïétiques, déficits immunitaires héréditaires, maladies inflammatoires et/ou auto-immunes recevant un traitement immunosuppresseur), excepté les personnes qui reçoivent un traitement régulier par immunoglobulines, personnes infectées par le VIH quel que soit leur âge et leur statut immunovirologique",
+			"maladie hépatique chronique avec ou sans cirrhose",
+			"les personnes obèses avec un IMC égal ou supérieur à 40 kg/m2",
+			"entourage familial des nourrissons âgés de moins de 6 mois avec des facteurs de risque de grippe grave",
+			"les personnes séjournant dans un établissement médico-social d’hébergement, quel que soit leur âge",
+		],
+		"description": "1 dose annuelle",
+	},
+];
+
+function format_age(regle) {
+	if ("ans" in regle) {
+		const ans = regle["ans"];
+		if (ans[1] === Infinity)
+			return `${ans[0]} ans et plus`;
+		return `Entre ${ans[0]} et ${ans[1]} ans`;
+	}
+	const mois = regle["mois"];
+	return `Entre ${mois[0]} et ${mois[1]} mois`;
+}
+
+function maj_reco() {
+	const age_elem = document.querySelector("#age");
+	const age_text = Number(age_elem.value);
+	const unite_elem = document.querySelector("#unite");
+	const unite_text = unite_elem.value;
+	const conditions = [];
+	for (let c of document.querySelectorAll(".condition")) {
+		if (c.firstChild.checked)
+			conditions.push(c.lastChild.innerText);
+	}
+	let deja_fait = [];
+	let regles_applicables = [];
+	for (let regle of REGLES_VACCINS) {
+		if ("ans" in regle || "mois" in regle) {
+			if (!(unite_text in regle)
+			|| age_text < regle[unite_text][0]
+			|| age_text > regle[unite_text][1])
+				continue;
+		}
+		let match_any = false;
+		if ("conditions" in regle) {
+			for (let c of regle["conditions"]) {
+				if (conditions.includes(c)) {
+					match_any = true;
+					break;
+				}
+			}
+			if (!match_any)
+				continue;
+		}
+		if (deja_fait.includes(regle["contre"]))
+			continue;
+		deja_fait.push(regle["contre"]);
+		regles_applicables.push(regle);
+	}
+	const vaccins_ul     = document.querySelector("#vaccins     .liste");
+	const rattrapages_ul = document.querySelector("#rattrapages .liste");
+	vaccins_ul    .replaceChildren();
+	rattrapages_ul.replaceChildren();
+	for (let regle of regles_applicables) {
+		console.log(regle);
+		const li = document.createElement("li");
+		li.appendChild(document.createTextNode(regle["contre"]));
+		if ("ans" in regle || "mois" in regle) {
+			li.appendChild(document.createElement("br"));
+			li.appendChild(document.createTextNode("— "+format_age(regle)));
+		}
+		if ("description" in regle) {
+			li.appendChild(document.createElement("br"));
+			li.appendChild(document.createTextNode("— "+regle["description"]));
+		}
+		if ("rattrapage" in regle) {
+			rattrapages_ul.appendChild(li);
+		} else {
+			vaccins_ul.appendChild(li);
+		}
+	}
+}
+
+window.onload = () => {
+	let conditions = [];
+	for (let regle of REGLES_VACCINS) {
+		if (!("conditions" in regle))
+			continue;
+		for (let c of regle["conditions"]) {
+			if (conditions.includes(c))
+				continue;
+			conditions.push(c);
+		}
+	}
+	const fieldset = document.querySelector("fieldset#conditions");
+	let n = 0;
+	for (let c of conditions) {
+		const cb = document.createElement("input");
+		cb.type = "checkbox";
+		cb.name = "conditions";
+		cb.id = `condition_${n}`;
+		const label = document.createElement("label");
+		label.innerText = c;
+		label.htmlFor = `condition_${n}`;
+		const line = document.createElement("div");
+		line.classList.add("condition");
+		line.appendChild(cb);
+		line.appendChild(label);
+		fieldset.appendChild(line);
+		//fieldset.appendChild(document.createElement("br"));
+		++n;
+	}
+	for (let i of document.querySelectorAll("#infospatient input, #infospatient select")) {
+		i.onchange   = maj_reco;
+		i.onkeypress = i.onchange;
+		i.onpaste    = i.onchange;
+		i.oninput    = i.onchange;
+	}
+}
+
+</script>
+<style type="text/css">
+	.warning {
+		font-size: 1.5em;
+		color: red;
+	}
+	#container {
+		display: flex;
+	}
+	#infospatient {
+		max-width: 50em;
+	}
+	#infospatient #age {
+		width: 4em;
+	}
+	#infospatient #conditions {
+		max-height: 60vh;
+		overflow: scroll;
+	}
+	div.condition {
+		display: flex;
+		vertical-align: top;
+		margin-bottom: .8em;
+	}
+	div.condition input {
+		max-height: 1.5em;
+	}
+	div.condition input, div.condition label {
+		display: block;
+	}
+	#recommandations {
+		min-width: 25em;
+	}
+	#recommandations>div:has(> ul:empty) {
+		display: none;
+	}
+</style>
+</head>
+<body>
+	<div id="entete">
+		<p class="warning">Ceci est un outil en développement, à ne pas utiliser en contexte médical</p>
+		<p>
+			<a href="https://www.ameli.fr/sites/default/files/Documents/calendrier_vaccinal_PS_avril24.pdf">
+				Calendrier des vaccinations (avril 2024)
+			</a>
+			[PDF 11,3&nbsp;Mo]
+		</p>
+		<p>
+			<a href="https://www.ameli.fr/sites/default/files/Documents/calendrier%20vaccinal%20simplifi%C3%A9%20avril%202024.pdf">
+				Calendrier vaccinal simplifié (avril 2024)
+			</a>
+			[PDF 0,7&nbsp;Mo]
+		</p>
+		<hr>
+	</div>
+	<div id="container">
+		<fieldset id="infospatient">
+		<!--form id="infospatient"-->
+			Âge du patient :
+			<input id="age" type="number" required>
+			<select id="unite">
+				<option value="ans">ans</option>
+				<option value="mois">mois</option>
+			</select>
+			<br>
+			<!--fieldset>
+				<input name="hf" id="femme" type="radio" unchecked><label for="femme">Femme</label><br>
+				<input name="hf" id="homme" type="radio" unchecked><label for="homme">Homme</label><br>
+			</fieldset-->
+			<fieldset id="conditions">
+			</fieldset>
+		</fieldset>
+		<!--/form-->
+		<div id="recommandations">
+			<div id="vaccins"    ><h2>Vaccins :     </h2><ul class="liste"></ul></div>
+			<div id="rattrapages"><h2>Rattrapages : </h2><ul class="liste"></ul></div>
+		</div>
+	</div>
+</body>
+</html>
